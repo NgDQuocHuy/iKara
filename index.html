@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iKara</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./static/assets/bootstrap/v5.2.2/css/bootstrap.css">
+    <link rel="stylesheet" href="./static/assets/css/app.css">
+</head>
+
+<body>
+    <div class="music">
+        <!-- <div class="music-name">
+            <h3>Tên bài hát</h3>
+        </div> -->
+        <div class="music-img">
+            <img src="./imgs/diathan.webp" alt="">
+        </div>
+        <div class="lyrics" style="height: 100px">
+            <div id="lyrics-before">
+                <p id="p-lyrics-before"></p>
+            </div>
+            <div id="lyrics-after">
+                <p id="p-lyrics-after"></p>
+            </div>
+        </div>
+        <div class="music-time">
+            <div class="remaining"></div>
+            <div class="duration"></div>
+        </div>
+        <input type="range" class="time-range" name="time-range" id="time-range">
+        <audio src="/music/beat.mp3" id="beat" class="beat"></audio>
+        <div class="options">
+            <i class="fa-solid fa-backward"></i>
+            <div class="play" id="play">
+                <div id="play-icon">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                <div id="pause-icon" hidden>
+                    <i class="fa-solid fa-pause"></i>
+                </div>
+            </div>
+            <i class="fa-solid fa-forward"></i>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script type="text/javascript" src="./static/assets/jquery/jquery-v3.6.0.min.js"></script>
+    <script type="text/javascript" src="./static/assets/bootstrap/v5.2.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let page = {
+            elements: {},
+            commands: {},
+            dialogs: {
+                elements: {},
+                commands: {},
+            }
+        }
+        page.dialogs.elements.playBtn = $("#play");
+        page.dialogs.elements.duration = $(".duration");
+        page.dialogs.elements.remaining = $(".remaining");
+
+        var beat = document.getElementById("beat");
+        var timeRange = document.getElementById("time-range");
+        var isPlay = false;
+        var time = setInterval(page.commands.displayTime, 500);
+        var renderLyrics = setInterval(page.commands.renderLyrics, 1);
+        var paintLyrics = setInterval(page.commands.paintLyrics, 2);
+        var lyricsBeat = [];
+
+        class LyricParam {
+            constructor(timeParam, lyricsParam) {
+                this.timeParam = timeParam;
+                this.lyricsParam = lyricsParam;
+            }
+        }
+
+        class ChartLyric {
+            constructor(timeChart, chartLyric) {
+                this.timeChart = timeChart;
+                this.chartLyric = chartLyric;
+            }
+        }
+
+        page.dialogs.elements.playBtn.on("click", () => {
+            page.commands.playPause();
+        })
+
+        page.commands.playPause = () => {
+            if (!isPlay) {
+                beat.play();
+                isPlay = true;
+                $("#play-icon").attr("hidden", true);
+                $("#pause-icon").attr("hidden", false);
+                time = setInterval(page.commands.displayTime, 500);
+                renderLyrics = setInterval(page.commands.renderLyrics, 1);
+                paintLyrics = setInterval(page.commands.paintLyrics, 2);
+
+            } else {
+                beat.pause();
+                isPlay = false;
+                $("#play-icon").attr("hidden", false);
+                $("#pause-icon").attr("hidden", true);
+                clearInterval(time);
+                clearInterval(renderLyrics);
+                clearInterval(paintLyrics);
+            }
+        }
+
+        page.commands.displayTime = () => {
+            const { duration, currentTime } = beat;
+            timeRange.max = duration;
+            timeRange.value = currentTime;
+            page.dialogs.elements.remaining.text(page.commands.formatTime(currentTime));
+            if (!duration) {
+                page.dialogs.elements.duration.text("00:00");
+            } else {
+                page.dialogs.elements.duration.text(`- ${page.commands.formatTime(duration - currentTime)}`);
+            }
+        }
+
+        page.commands.formatTime = (time) => {
+            var minutes = Math.floor(time / 60);
+            var seconds = Math.floor(time - minutes * 60);
+            return `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+        }
+
+        timeRange.addEventListener("change", () => {
+            beat.currentTime = timeRange.value;
+            page.commands.renderLyrics();
+        });
+
+        beat.addEventListener("ended", () => {
+            console.log("end");
+        });
+
+        let xmlText = '';
+        fetch('./music/lyrics.xml').then((resp) => {
+            resp.text().then((xml) => {
+                xmlText = xml;
+                let parser = new DOMParser();
+                let xmlDOM = parser.parseFromString(xmlText, 'application/xml');
+                let lyrics = xmlDOM.querySelectorAll("data");
+                lyrics.forEach(lyricsXmlParam => {
+                    for (let i = 0; i < lyricsXmlParam.children.length; i++) {
+                        let lyricsBefore = '';
+                        let lyricsAfter = '';
+                        let sizeParam = lyricsXmlParam.children[i].getElementsByTagName('i').length;
+                        let lyricsParam = new LyricParam();
+                        var lyricsChart = [];
+                        for (let j = 0; j < sizeParam; j++) {
+                            let chartLyric = new ChartLyric();
+                            chartLyric.timeChart = lyricsXmlParam.children[i].getElementsByTagName('i')[j].getAttribute('va');
+                            chartLyric.chartLyric = lyricsXmlParam.children[i].getElementsByTagName('i')[j].textContent;
+                            lyricsChart.push(chartLyric);
+                        }
+                        lyricsParam.timeParam = lyricsXmlParam.children[i].getElementsByTagName('i')[0].getAttribute('va');
+                        lyricsParam.lyricsParam = lyricsChart;
+                        lyricsBeat.push(lyricsParam);
+                    }
+                });
+            });
+        });
+
+        page.commands.renderLyrics = () => {
+            // console.log(beat.currentTime);
+            // if (page.commands.formatTime(beat.currentTime) == "00:00") {
+            //     $("#p-lyrics-before").append("...");
+            //     $("#lyrics-after").text("...");
+            // } else {
+            for (let i = 0; i < lyricsBeat.length; i++) {
+                let num = +(lyricsBeat[i].timeParam);
+                if (beat.currentTime.toFixed(2) == num.toFixed(2)) {
+                    let paramChartFirst = '';
+                    let paramChartSecond = '';
+                    for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
+                        paramChartFirst += `<i id="${lyricsBeat[i].lyricsParam[j].timeChart}">${lyricsBeat[i].lyricsParam[j].chartLyric}</i> `;
+                    }
+                    for (let j = 0; j < lyricsBeat[i + 1].lyricsParam.length; j++) {
+                        paramChartSecond += lyricsBeat[i + 1].lyricsParam[j].chartLyric;
+                    }
+                    setTimeout(() => {
+                        $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'>${paramChartFirst}</p>`);
+                        $("#p-lyrics-after").replaceWith(`<p id='p-lyrics-after'>${paramChartSecond}</p>`);
+                    }, 100);
+
+                }
+            }
+            // }
+        }
+
+        page.commands.paintLyrics = () => {
+            for (let i = 0; i < lyricsBeat.length; i++) {
+                for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
+                    let num = +(lyricsBeat[i].lyricsParam[j].timeChart);
+                    if (beat.currentTime.toFixed(1) == num.toFixed(1)) {
+                        setTimeout(() => {
+                            document.getElementById(lyricsBeat[i].lyricsParam[j].timeChart).classList.add("paintRed");
+                        }, 200);
+                    }
+                }
+            }
+        }
+
+        page.commands.displayTime();
+    </script>
+</body>
+
+</html>
