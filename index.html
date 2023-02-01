@@ -15,9 +15,6 @@
 
 <body>
     <div class="music">
-        <!-- <div class="music-name">
-            <h3>Tên bài hát</h3>
-        </div> -->
         <div class="music-img">
             <img src="./imgs/diathan.webp" alt="">
         </div>
@@ -167,30 +164,29 @@
         });
 
         page.commands.renderLyrics = () => {
-            // console.log(beat.currentTime);
-            // if (page.commands.formatTime(beat.currentTime) == "00:00") {
-            //     $("#p-lyrics-before").append("...");
-            //     $("#lyrics-after").text("...");
-            // } else {
-            for (let i = 0; i < lyricsBeat.length; i++) {
-                let num = +(lyricsBeat[i].timeParam);
-                if (beat.currentTime.toFixed(2) == num.toFixed(2)) {
-                    let paramChartFirst = '';
-                    let paramChartSecond = '';
-                    for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
-                        paramChartFirst += `<i id="${lyricsBeat[i].lyricsParam[j].timeChart}">${lyricsBeat[i].lyricsParam[j].chartLyric}</i> `;
+            console.log(beat.currentTime);
+            if (page.commands.formatTime(beat.currentTime) == "00:00") {
+                $("#p-lyrics-before").text("...");
+                $("#p-lyrics-after").text("...");
+            } else {
+                for (let i = 0; i < lyricsBeat.length; i++) {
+                    let num = +(lyricsBeat[i].timeParam);
+                    if (beat.currentTime.toFixed(2) == num.toFixed(2)) {
+                        let paramChartFirst = '';
+                        let paramChartSecond = '';
+                        for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
+                            paramChartFirst += `<i id="${lyricsBeat[i].lyricsParam[j].timeChart}">${lyricsBeat[i].lyricsParam[j].chartLyric}</i> `;
+                        }
+                        for (let j = 0; j < lyricsBeat[i + 1].lyricsParam.length; j++) {
+                            paramChartSecond += lyricsBeat[i + 1].lyricsParam[j].chartLyric;
+                        }
+                        setTimeout(() => {
+                            $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'>${paramChartFirst}</p>`);
+                            $("#p-lyrics-after").replaceWith(`<p id='p-lyrics-after'>${paramChartSecond}</p>`);
+                        }, 100);
                     }
-                    for (let j = 0; j < lyricsBeat[i + 1].lyricsParam.length; j++) {
-                        paramChartSecond += lyricsBeat[i + 1].lyricsParam[j].chartLyric;
-                    }
-                    setTimeout(() => {
-                        $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'>${paramChartFirst}</p>`);
-                        $("#p-lyrics-after").replaceWith(`<p id='p-lyrics-after'>${paramChartSecond}</p>`);
-                    }, 100);
-
                 }
             }
-            // }
         }
 
         page.commands.paintLyrics = () => {
