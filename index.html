@@ -140,6 +140,9 @@
                         $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'></p>`);
                         $("#p-lyrics-after").replaceWith(`<p id='p-lyrics-after'></p>`);
                         flag = false;
+                    } else if (+(lyricsBeat[lyricsBeat.length - 1].timeParam) < +(beat.currentTime.toFixed(2)) && +(beat.currentTime.toFixed(2)) < beat.duration && flag == true) {
+                        page.commands.render2(lyricsBeat.length);
+                        flag = false;
                     }
                 }
             }
@@ -237,55 +240,63 @@
             let paramChartFirst = '';
             let paramChartSecond = '';
             let hihi = '';
-            for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
-                let timeSlow = +(lyricsBeat[i].lyricsParam[j].timeChart);
-                let timeFirst = 0;
-                let timeSecond = +(lyricsBeat[i].lyricsParam[j].timeChart);
-                let timeSpace = 0;
-                if (lyricsBeat[i].lyricsParam[j + 1]) {
-                    for (let k = 0; k < lyricsBeat[i].lyricsParam[j].chartLyric.length; k++) {
-                        timeFirst = +(lyricsBeat[i].lyricsParam[j + 1].timeChart);
-                        timeSpace = (timeFirst - timeSecond) / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length) + 1);
-                        timeSlow += timeSpace;
+            if (lyricsBeat[i] != undefined) {
+                for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
+                    let timeSlow = +(lyricsBeat[i].lyricsParam[j].timeChart);
+                    let timeFirst = 0;
+                    let timeSecond = +(lyricsBeat[i].lyricsParam[j].timeChart);
+                    let timeSpace = 0;
+                    if (lyricsBeat[i].lyricsParam[j + 1]) {
+                        for (let k = 0; k < lyricsBeat[i].lyricsParam[j].chartLyric.length; k++) {
+                            timeFirst = +(lyricsBeat[i].lyricsParam[j + 1].timeChart);
+                            timeSpace = (timeFirst - timeSecond) / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length) + 1);
+                            timeSlow += timeSpace;
 
-                        if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
-                            paramChartFirst += `<span>&nbsp</span> `;
-                        } else {
-                            if (+(timeSlow.toFixed(2)) < +(beat.currentTime.toFixed(2))) {
-                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}" class="paintRed">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                            if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
+                                paramChartFirst += `<span>&nbsp</span> `;
                             } else {
-                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                if (+(timeSlow.toFixed(2)) < +(beat.currentTime.toFixed(2))) {
+                                    paramChartFirst += `<span id="${timeSlow.toFixed(2)}" class="paintRed">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                } else {
+                                    paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                }
                             }
                         }
-                    }
-                } else {
-                    for (let k = 0; k < lyricsBeat[i].lyricsParam[j].chartLyric.length; k++) {
-                        if (lyricsBeat[i + 1] != undefined) {
-                            timeFirst = +(lyricsBeat[i + 1].lyricsParam[0].timeChart);
-                            timeSpace = (timeFirst - timeSecond) / 5 / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length));
-                        } else {
-                            timeFirst = beat.duration - +(lyricsBeat[i].lyricsParam[j].timeChart);
-                            timeSpace = (beat.duration - timeSecond) / 5 / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length));
-                        }
-                        timeSlow += timeSpace;
-                        if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
-                            paramChartFirst += `<span id="${timeSlow.toFixed(2)}">&nbsp</span> `;
-                        } else {
-                            if (+(timeSlow.toFixed(2)) < +(beat.currentTime.toFixed(2))) {
-                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}" class="paintRed">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                    } else {
+                        for (let k = 0; k < lyricsBeat[i].lyricsParam[j].chartLyric.length; k++) {
+                            if (lyricsBeat[i + 1] != undefined) {
+                                timeFirst = +(lyricsBeat[i + 1].lyricsParam[0].timeChart);
+                                timeSpace = (timeFirst - timeSecond) / 5 / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length));
                             } else {
-                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                timeFirst = beat.duration - +(lyricsBeat[i].lyricsParam[j].timeChart);
+                                timeSpace = (beat.duration - timeSecond) / 5 / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length));
+                            }
+                            timeSlow += timeSpace;
+                            if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
+                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}">&nbsp</span> `;
+                            } else {
+                                if (+(timeSlow.toFixed(2)) < +(beat.currentTime.toFixed(2))) {
+                                    paramChartFirst += `<span id="${timeSlow.toFixed(2)}" class="paintRed">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                } else {
+                                    paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                }
                             }
                         }
                     }
                 }
+                $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'>${paramChartFirst}</p>`);
+            } else {
+                for (let j = 0; j < lyricsBeat[i - 1].lyricsParam.length; j++) {
+                    paramChartFirst += lyricsBeat[i - 1].lyricsParam[j].chartLyric;
+                }
+                $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'>${paramChartFirst}</p>`);
+                document.getElementById("p-lyrics-before").classList.add("paintRed");
             }
             if (lyricsBeat[i + 1] != undefined) {
                 for (let j = 0; j < lyricsBeat[i + 1].lyricsParam.length; j++) {
                     paramChartSecond += lyricsBeat[i + 1].lyricsParam[j].chartLyric;
                 }
             }
-            $("#p-lyrics-before").replaceWith(`<p id='p-lyrics-before'>${paramChartFirst}</p>`);
             $("#p-lyrics-after").replaceWith(`<p id='p-lyrics-after'>${paramChartSecond}</p>`);
         }
 
