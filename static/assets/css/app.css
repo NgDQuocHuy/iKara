@@ -1,3 +1,5 @@
+* {
+}
 .music {
     background-color: whitesmoke;
     margin: 0 auto;
@@ -5,6 +7,11 @@
     max-width: 500px;
     border-radius: 20px;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.p-lyrics-before, span { 
+    word-spacing: -20px;
+    letter-spacing: -5px;
 }
 
 .music-img {
@@ -84,5 +91,9 @@
 .paintRed {
     color: plum;
         -webkit-transition: color 1s ease-out;
-        transition: color 1s ease-out;
+        transition: color 0.05s ease-out;
 }
+
+/* .paintRed {
+    color: red;
+} */

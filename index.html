@@ -164,7 +164,6 @@
         });
 
         page.commands.renderLyrics = () => {
-            console.log(beat.currentTime);
             if (page.commands.formatTime(beat.currentTime) == "00:00") {
                 $("#p-lyrics-before").text("...");
                 $("#p-lyrics-after").text("...");
@@ -174,8 +173,55 @@
                     if (beat.currentTime.toFixed(2) == num.toFixed(2)) {
                         let paramChartFirst = '';
                         let paramChartSecond = '';
+                        let hihi = '';
                         for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
-                            paramChartFirst += `<i id="${lyricsBeat[i].lyricsParam[j].timeChart}">${lyricsBeat[i].lyricsParam[j].chartLyric}</i> `;
+                            let timeSlow = +(lyricsBeat[i].lyricsParam[j].timeChart);
+                            let timeFirst = 0;
+                            let timeSecond = +(lyricsBeat[i].lyricsParam[j].timeChart);
+                            let timeSpace = 0;
+                            if (lyricsBeat[i].lyricsParam[j + 1]) {
+                                for (let k = 0; k < lyricsBeat[i].lyricsParam[j].chartLyric.length; k++) {
+                                    timeFirst = +(lyricsBeat[i].lyricsParam[j + 1].timeChart);
+                                    timeSpace = (timeFirst - timeSecond) / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length) + 1);
+                                    timeSlow += timeSpace;
+                                    if (j == 0 && k == 0) {
+                                        paramChartFirst += `<span id="${timeSlow.toFixed(2)}" class="paintRed">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                    } else {
+                                        if (k == 0) {
+                                            if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
+                                                paramChartFirst += `<span>&nbsp</span> `;
+                                            } else {
+                                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                            }
+                                        } else {
+                                            if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
+                                                paramChartFirst += `<span>&nbsp</span> `;
+                                            } else {
+                                                paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (let k = 0; k < lyricsBeat[i].lyricsParam[j].chartLyric.length; k++) {
+                                    timeFirst = +(lyricsBeat[i + 1].lyricsParam[j].timeChart);
+                                    timeSpace = (timeFirst - timeSecond) / 5 / (+(lyricsBeat[i].lyricsParam[j].chartLyric.length));
+                                    timeSlow += timeSpace;
+                                    if (k == 0) {
+                                        if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
+                                            paramChartFirst += `<span id="${timeSlow.toFixed(2)}">&nbsp</span> `;
+                                        } else {
+                                            paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                        }
+                                    } else {
+                                        if (lyricsBeat[i].lyricsParam[j].chartLyric[k] == ' ') {
+                                            paramChartFirst += `<span id="${timeSlow.toFixed(2)}">&nbsp</span> `;
+                                        } else {
+                                            paramChartFirst += `<span id="${timeSlow.toFixed(2)}">${lyricsBeat[i].lyricsParam[j].chartLyric[k]}</span> `;
+                                        }
+                                    }
+                                }
+                            }
                         }
                         for (let j = 0; j < lyricsBeat[i + 1].lyricsParam.length; j++) {
                             paramChartSecond += lyricsBeat[i + 1].lyricsParam[j].chartLyric;
@@ -190,18 +236,10 @@
         }
 
         page.commands.paintLyrics = () => {
-            for (let i = 0; i < lyricsBeat.length; i++) {
-                for (let j = 0; j < lyricsBeat[i].lyricsParam.length; j++) {
-                    let num = +(lyricsBeat[i].lyricsParam[j].timeChart);
-                    if (beat.currentTime.toFixed(1) == num.toFixed(1)) {
-                        setTimeout(() => {
-                            document.getElementById(lyricsBeat[i].lyricsParam[j].timeChart).classList.add("paintRed");
-                        }, 200);
-                    }
-                }
+            if (document.getElementById(beat.currentTime.toFixed(2))) {
+                document.getElementById(beat.currentTime.toFixed(2)).classList.add("paintRed");
             }
         }
-
         page.commands.displayTime();
     </script>
 </body>
